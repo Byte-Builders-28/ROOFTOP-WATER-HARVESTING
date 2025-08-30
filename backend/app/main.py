@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 from .db import models, database
-from app.api.routes import router 
+# from app.api.routes import router 
 from .api import groundwater, weather
 
 models.Base.metadata.create_all(bind=database.engine)
