@@ -22,7 +22,7 @@ def evaporation_loss(temp, days, surface_area):
     return evap_mm * surface_area
 
 
-def simulate_system_mounth(
+def simulate_system_month(
     monthly_rainfall, monthly_temp, monthly_humidity,
     area_m2, population, usage_per_day=135,
     tank_capacity=20000, groundwater_capacity=50000,
