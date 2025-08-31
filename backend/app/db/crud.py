@@ -37,18 +37,16 @@ def save_groundwater(db: Session, records: list):
 
 
 # Rainfall
-def save_rainfall(db: Session, records: list):
-    df = preprocess_and_average(records, time_col="date", value_col="rainfall", freq="D")
-
-    for _, row in df.iterrows():
-        db_record = models.Rainfall(
-            location=records[0].get("location", "Unknown"),
-            rainfall=row["rainfall"],
-            date=row["date"].to_pydatetime()
-        )
-        db.add(db_record)
+def save_rainfall_prediction(db, subdivision: str, month: str, predicted_value: float):
+    prediction = models.RainfallPrediction(
+        subdivision=subdivision,
+        month=month,
+        predicted_rainfall=predicted_value
+    )
+    db.add(prediction)
     db.commit()
-
+    db.refresh(prediction)
+    return prediction
 
 # Temperature 
 def save_temperature(db: Session, records: list):
