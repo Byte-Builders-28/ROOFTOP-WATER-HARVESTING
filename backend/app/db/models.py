@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime
-from database import Base
+from .database import Base
 
 # Ground Water Level Table
 class GroundWaterLevel(Base):

@@ -10,5 +10,5 @@ models.Base.metadata.create_all(bind=database.engine)
 app = FastAPI()
 
 # Routers Added...
-app.include_router(router, prefix="/api")
+app.include_router(router)
 # app.include_router(weather.router, prefix="/api")

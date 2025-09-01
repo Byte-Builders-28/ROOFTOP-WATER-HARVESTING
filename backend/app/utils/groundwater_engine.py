@@ -8,6 +8,8 @@ def get_groundwater(db):
     url = "https://indiawris.gov.in/swagger-ui/index.html#/Data%20API%20Based%20On%20Admin%20Hierarchy/getGroundWaterLevel"   # Replace with actual working API
     response = requests.get(url)
     data = response.json()
+    
+    print(response.status_code)
 
     for entry in data.get("items", []):   # Adjust based on API response
         crud.save_groundwater(
