@@ -13,15 +13,13 @@ class GroundWaterLevel(Base):
     data_time = Column(DateTime)
 
 # Rainfall Table
-class Rainfall(Base):
-    __tablename__ = "rainfall"
+class RainfallPrediction(Base):
+    __tablename__ = "rainfall_prediction"
+
     id = Column(Integer, primary_key=True, index=True)
-    station_code = Column(String)
-    station_name = Column(String)
-    state = Column(String)
-    district = Column(String)
-    data_value = Column(Float)
-    data_time = Column(DateTime)
+    subdivision = Column(String, index=True)
+    month = Column(String, index=True)   # JAN, FEB, ...
+    predicted_rainfall = Column(Float)   # Predicted value
 
 # Temperature Table
 class Temperature(Base):
