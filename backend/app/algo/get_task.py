@@ -77,17 +77,24 @@ def feasibility_score(area_m2, rainfall_mm, temp, humidity, population,
     }
 
 def recommend_system(area_m2, rainfall_mm, temp, humidity, population,
-                     budget=None, tank_capacity=20000, groundwater_capacity=50000):
+                     budget=None, tank_capacity=None, groundwater_capacity=50000):
 
-    # get the full feasibility details
+    # Step 1: estimate potential & demand
+    potential = estimate_rainwater_potential(area_m2, rainfall_mm, humidity, temp)
+    demand = estimate_water_demand(population)
+
+    # Step 2: estimate required tank size if not provided
+    if not tank_capacity:
+        tank_capacity = estimate_tank_size(potential, demand)
+
+    # Step 3: get feasibility with this tank size
     result = feasibility_score(area_m2, rainfall_mm, temp, humidity,
                                population, budget, tank_capacity, groundwater_capacity)
 
     supply = result["supply"]
-    demand = result["demand"]
     gw_left = result["gw_left"]
 
-    # Decision rules
+    # Step 4: decision rules
     if supply >= demand * 0.9:
         system_type = "storage"
         reason = "Rainwater supply can meet most of the demand."
@@ -98,12 +105,13 @@ def recommend_system(area_m2, rainfall_mm, temp, humidity, population,
         system_type = "hybrid"
         reason = "Rainwater alone is not enough; recharge + storage recommended."
 
-    # add recommendation fields into the feasibility dict
+    # Final output
     result.update({
         "system_type": system_type,
         "reason": reason,
-        "tank_size": min(demand, tank_capacity),
-        "cost_estimate": result["cost"]
+        "tank_size": tank_capacity,
+        "cost_estimate": estimate_cost(tank_capacity)
     })
 
     return result
+

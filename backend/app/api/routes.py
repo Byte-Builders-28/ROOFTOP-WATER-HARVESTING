@@ -8,6 +8,8 @@ from datetime import datetime
 from ..utils.groundwater_engine import get_groundwater
 from ..utils.rainfall_engine import get_RTWH
 
+from models import RainRequest
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl = "login")
 
 # Fake user db (later you’ll use your actual database)
@@ -25,6 +27,20 @@ def read_root():
 @router.get("/fetch-groundwater")
 def fetch_groundwater(db: Session = Depends(database.get_db)):
    return get_groundwater(db)
+
+@router.post("/recommend")
+def get_recommendation(req: RainRequest):
+    result = get_RTWH(
+        area_m2=req.area_m2,
+        rainfall_mm=req.rainfall_mm,
+        temp=req.temp,
+        humidity=req.humidity,
+        population=req.population,
+        budget=req.budget,
+        tank_capacity=req.tank_capacity,
+        groundwater_capacity=req.groundwater_capacity
+    )
+    return result
 
 @router.post("/login")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):

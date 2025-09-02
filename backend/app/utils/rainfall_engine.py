@@ -8,5 +8,11 @@ from data_engineering.rainfall_model import train_and_predict_rainfall
 predictions = train_and_predict_rainfall("./data_engineering/data/rainfall.csv", subdivision="GOA")
 print("Predicted 12-month rainfall:", predictions)
 
-def get_RTWH(db):
+def get_RTWH(
+        area_m2,
+        population,
+        budget,
+        tank_capacity,
+        groundwater_capacity
+    ):
     pass
