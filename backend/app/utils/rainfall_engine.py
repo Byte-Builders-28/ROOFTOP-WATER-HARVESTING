@@ -9,10 +9,48 @@ predictions = train_and_predict_rainfall("./data_engineering/data/rainfall.csv",
 print("Predicted 12-month rainfall:", predictions)
 
 def get_RTWH(
-        area_m2,
-        population,
-        budget,
-        tank_capacity,
-        groundwater_capacity
-    ):
-    pass
+    area_m2: float,
+    population: int,
+    groundwater_capacity: float,
+    state: str,
+    city: str,
+    budget: float = None,
+    tank_capacity: float = None
+):
+    """
+    Get Rainwater Tank + Water Harvesting (RTWH) recommendation.
+    
+    Args:
+        area_m2 (float): Roof/land area in square meters.
+        population (int): Number of people using the water.
+        groundwater_capacity (float): Groundwater capacity in liters.
+        state (str): State where the system will be implemented.
+        city (str): City where the system will be implemented.
+        budget (float, optional): Budget in currency units.
+        tank_capacity (float, optional): Tank capacity in liters.
+
+    Returns:
+        dict: Recommendation result with feasibility, system type, cost, etc.
+    """
+    
+    # TODO: fetch rainfall based on state + city (API integration)
+    # rainfall_mm = get_rainfall_from_location(state, city)
+    # temp, humidity = get_weather_from_location(state, city)
+
+    # For now, just placeholder values
+    rainfall_mm = 1000   # mm/year
+    temp = 28            # °C
+    humidity = 65        # %
+
+    from algo.get_task import recommend_system
+    
+    return recommend_system(
+        area_m2=area_m2,
+        rainfall_mm=rainfall_mm,
+        temp=temp,
+        humidity=humidity,
+        population=population,
+        budget=budget,
+        tank_capacity=tank_capacity,
+        groundwater_capacity=groundwater_capacity
+    )
