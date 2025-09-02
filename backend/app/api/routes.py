@@ -26,11 +26,6 @@ def read_root():
 def fetch_groundwater(db: Session = Depends(database.get_db)):
    return get_groundwater(db)
 
-
-@router.get("/fetch-weather")
-def fetch_weather(db: Session = Depends(database.get_db)):
-	return get_rainfall(db)
-
 @router.post("/login")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
     if form_data.username != fake_user["username"] or not verify_password(form_data.password, fake_user["hashed_password"]):
