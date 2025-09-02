@@ -9,7 +9,7 @@ def get_distinct_subdivisions(csv_path: str) -> list[str]:
     
     return subdivisions
 
-# Example *****
-# if __name__ == "__main__":
-#     unique_subdivisions = get_distinct_subdivisions("/data/rainfall.csv")
-#     print(unique_subdivisions)
+# Example 
+if __name__ == "__main__":
+    unique_subdivisions = get_distinct_subdivisions("data_engineering/data/rainfall.csv")
+    print(unique_subdivisions)
