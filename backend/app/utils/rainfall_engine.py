@@ -5,6 +5,8 @@ from data_engineering.rainfall_model import train_and_predict_rainfall
 
 # --- Rainfall ---
 
+from utils.weather import get_info_from_location
+
 predictions = train_and_predict_rainfall("./data_engineering/data/rainfall.csv", subdivision="GOA")
 print("Predicted 12-month rainfall:", predictions)
 
@@ -35,12 +37,13 @@ def get_RTWH(
     
     # TODO: fetch rainfall based on state + city (API integration)
     # rainfall_mm = get_rainfall_from_location(state, city)
-    # temp, humidity = get_weather_from_location(state, city)
+ 
+    info = get_info_from_location(state=state, city=city)
+    temp = info["temperature"]            # °C
+    humidity = info["humidity"]        # %
 
     # For now, just placeholder values
     rainfall_mm = 1000   # mm/year
-    temp = 28            # °C
-    humidity = 65        # %
 
     from algo.get_task import recommend_system
     
