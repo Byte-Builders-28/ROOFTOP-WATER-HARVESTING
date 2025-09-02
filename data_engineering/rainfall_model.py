@@ -1,6 +1,6 @@
 import pandas as pd
 from sklearn.linear_model import LinearRegression
-from ..db import crud, session
+from backend.app.db import crud, database
 
 def train_and_predict_rainfall(csv_path="data/rainfall.csv", subdivision="BIHAR"):
     """
@@ -19,7 +19,7 @@ def train_and_predict_rainfall(csv_path="data/rainfall.csv", subdivision="BIHAR"
     predictions = []
 
     # Start DB session
-    db = session.SessionLocal()
+    db = database.SessionLocal()
 
     for month in months:
         y = df[month].fillna(0)  # Handle NaNs if present
