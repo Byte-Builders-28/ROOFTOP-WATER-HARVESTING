@@ -32,14 +32,13 @@ def fetch_groundwater(db: Session = Depends(database.get_db)):
 def get_recommendation(req: RainRequest):
     result = get_RTWH(
         area_m2=req.area_m2,
-        rainfall_mm=req.rainfall_mm,
-        temp=req.temp,
-        humidity=req.humidity,
         population=req.population,
         budget=req.budget,
         tank_capacity=req.tank_capacity,
-        groundwater_capacity=req.groundwater_capacity
-    )
+        groundwater_capacity=req.groundwater_capacity,
+        state = req.state,
+        city = req.city
+    )   
     return result
 
 @router.post("/login")
