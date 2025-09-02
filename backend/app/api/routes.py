@@ -6,7 +6,7 @@ from .auth import create_access_token, verify_password, get_password_hash, get_c
 from datetime import datetime
 
 from ..utils.groundwater_engine import get_groundwater
-from ..utils.rainfall_engine import get_rainfall
+from ..utils.rainfall_engine import get_RTWH
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl = "login")
 

@@ -31,7 +31,7 @@ def feasibility_score(area_m2, rainfall_mm, temp, humidity, population,
                       budget=None, tank_capacity=20000, groundwater_capacity=50000):
     """
     Compute feasibility using the detailed annual simulation.
-    Returns a score (0–100) and key stats.
+    Returns a score (0-100) and key stats.
     """
     total_supply, demand_total, reliability_ratio, unmet, gw_left = simulate_system_annual(
         avg_rainfall=rainfall_mm,
