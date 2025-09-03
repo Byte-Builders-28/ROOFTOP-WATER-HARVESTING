@@ -1,6 +1,6 @@
 # services/rainfall_engine.py
 
-from  sim_rainwater import dynamic_coefficient, evaporation_loss, simulate_system_annual
+from  .sim_rainwater import dynamic_coefficient, evaporation_loss, simulate_system_annual
 
 def estimate_rainwater_potential(area_m2, rainfall_mm, humidity, temp, coefficient=0.8):
     """Estimate annual harvestable rainwater (liters) considering humidity & evaporation."""
@@ -72,7 +72,7 @@ def feasibility_score(area_m2, rainfall_mm, temp, humidity, population,
         "demand": demand_total,
         "unmet": unmet,
         "reliability": reliability_ratio,
-        "cost": cost,
+        "cost_estimate": cost,
         "gw_left": gw_left
     }
 
@@ -110,7 +110,7 @@ def recommend_system(area_m2, rainfall_mm, temp, humidity, population,
         "system_type": system_type,
         "reason": reason,
         "tank_size": tank_capacity,
-        "cost_estimate": estimate_cost(tank_capacity)
+        # "cost_estimate": estimate_cost(tank_capacity)
     })
 
     return result

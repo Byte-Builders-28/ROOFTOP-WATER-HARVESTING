@@ -2,6 +2,9 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 from backend.app.db import crud, database
 
+months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", 
+          "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
+
 def train_and_predict_rainfall(csv_path="data/rainfall.csv", subdivision="BIHAR"):
     """
     Train linear regression on rainfall data and predict for each month.
