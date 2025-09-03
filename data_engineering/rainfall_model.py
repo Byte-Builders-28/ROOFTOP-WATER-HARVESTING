@@ -12,9 +12,6 @@ def train_and_predict_rainfall(csv_path="data/rainfall.csv", subdivision="BIHAR"
     # Filter subdivision
     df = df[df["SUBDIVISION"] == subdivision]
 
-    months = ["JAN","FEB","MAR","APR","MAY","JUN",
-              "JUL","AUG","SEP","OCT","NOV","DEC"]
-
     X = df[["YEAR"]]  # Independent variable
     predictions = []
 
