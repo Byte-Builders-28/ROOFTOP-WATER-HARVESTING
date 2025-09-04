@@ -21,6 +21,95 @@ def evaporation_loss(temp, days, surface_area):
     # mm * m² = liters
     return evap_mm * surface_area
 
+def estimate_rainwater_potential(area_m2, rainfall_mm, humidity, temp, roof_type):
+    roof_coefficients = {
+    "Concrete (RCC)": 0.75,
+    "Cement Tiles": 0.70,
+    "Clay Tiles": 0.60,
+    "Metal Sheet": 0.85,
+    "GI Sheet": 0.80,
+    "Asbestos Sheet": 0.75,
+    "Slate": 0.65,
+    "Stone Slab": 0.65,
+    "Corrugated Sheet": 0.80,
+    "Thatched": 0.35,
+    "Plastic Sheet / PVC": 0.85,
+    "Glass": 0.90,
+    "Green Roof (vegetated)": 0.30
+    }
+
+    coefficient = roof_coefficients[roof_type]
+
+    """Estimate annual harvestable rainwater (liters) considering humidity & evaporation."""
+    efficiency = dynamic_coefficient(coefficient, humidity)
+    rain_collected = area_m2 * rainfall_mm * efficiency
+
+    # evaporation loss (tank surface ≈ 10% of roof area, assume 365 days)
+    evap = evaporation_loss(temp, 365, area_m2 * 0.1)
+    return max(0, rain_collected - evap)
+
+
+def estimate_water_demand(population, usage_per_day=135):
+    """Estimate annual water demand (liters)."""
+    return population * usage_per_day * 365
+
+
+
+def simulate_system_annual(
+    avg_rainfall,  # mm/year
+    avg_temp,      # °C
+    avg_humidity,  # %
+    area_m2,
+    population,
+    tank_capacity,
+    rooftype,
+    usage_per_day=135,
+    groundwater_capacity=50000,
+    soil_infiltration=0.5
+):
+    """Simulate rainwater harvesting + groundwater recharge using annual averages (no loop)."""
+
+    # Total annual demand
+    demand_total = estimate_water_demand(population, usage_per_day)
+    # Rainwater collected over the year
+    rain_collected = estimate_rainwater_potential(area_m2,avg_rainfall,avg_humidity,avg_temp, roof_type= rooftype)
+
+    # Start tank and groundwater
+    tank_level = rain_collected
+    gw_level = min(demand_total, groundwater_capacity * 0.5)
+
+    tank_capacity *= 12 # so it spans 1 y.. tank is for 30 days
+
+    # Handle tank overflow
+    if tank_level > tank_capacity:
+        recharge = (tank_level - tank_capacity) * soil_infiltration
+        gw_level = min(groundwater_capacity, gw_level + recharge)
+        tank_level = tank_capacity
+
+    # Supply demand from tank first
+    if tank_level >= demand_total:
+        tank_level -= demand_total
+        total_supply = demand_total
+        unmet = 0
+        reliability_ratio = 1
+    else:
+        demand_left = demand_total - tank_level
+        total_supply = tank_level
+        tank_level = 0
+
+        if gw_level >= demand_left:
+            gw_level -= demand_left
+            total_supply += demand_left
+            unmet = 0
+            reliability_ratio = 1
+        else:
+            total_supply += gw_level
+            unmet = demand_left - gw_level
+            gw_level = 0
+            reliability_ratio = total_supply / demand_total
+
+    return total_supply, demand_total, reliability_ratio, unmet, gw_level
+
 
 def simulate_system_month(
     monthly_rainfall, monthly_temp, monthly_humidity,
@@ -73,64 +162,4 @@ def simulate_system_month(
 
     reliability_ratio = reliability / 12
     demand_total = demand_monthly * 12
-    return total_supply, demand_total, reliability_ratio, unmet, gw_level
-
-def simulate_system_annual(
-    avg_rainfall,  # mm/year
-    avg_temp,      # °C
-    avg_humidity,  # %
-    area_m2,
-    population,
-    usage_per_day=135,
-    tank_capacity=20000,
-    groundwater_capacity=50000,
-    soil_infiltration=0.5
-):
-    """Simulate rainwater harvesting + groundwater recharge using annual averages (no loop)."""
-
-    # Total annual demand
-    days = 365
-    demand_total = usage_per_day * population * days
-
-    # Rainwater collected over the year
-    efficiency = dynamic_coefficient(0.8, avg_humidity)
-    rain_collected = avg_rainfall * area_m2 * efficiency
-
-    # Evaporation loss (tank surface ~10% of area)
-    evap = evaporation_loss(avg_temp, days, area_m2 * 0.1)
-    rain_collected = max(0, rain_collected - evap)
-
-    # Start tank and groundwater
-    tank_level = rain_collected
-    gw_level = min(demand_total, groundwater_capacity * 0.5)
-
-
-    # Handle tank overflow
-    if tank_level > tank_capacity:
-        recharge = (tank_level - tank_capacity) * soil_infiltration
-        gw_level = min(groundwater_capacity, gw_level + recharge)
-        tank_level = tank_capacity
-
-    # Supply demand from tank first
-    if tank_level >= demand_total:
-        tank_level -= demand_total
-        total_supply = demand_total
-        unmet = 0
-        reliability_ratio = 1
-    else:
-        demand_left = demand_total - tank_level
-        total_supply = tank_level
-        tank_level = 0
-
-        if gw_level >= demand_left:
-            gw_level -= demand_left
-            total_supply += demand_left
-            unmet = 0
-            reliability_ratio = 1
-        else:
-            total_supply += gw_level
-            unmet = demand_left - gw_level
-            gw_level = 0
-            reliability_ratio = total_supply / demand_total
-
     return total_supply, demand_total, reliability_ratio, unmet, gw_level

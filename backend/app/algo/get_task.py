@@ -1,25 +1,18 @@
+from  .sim_rainwater import simulate_system_annual, estimate_rainwater_potential,estimate_water_demand
 
+def estimate_tank_size(potential, demand, population ,days_of_storage = 30, per_person_min=135,safety_factor=0.4):
+    """
+    Suggest a realistic tank size considering annual potential, population, and variability.
+    """
+    min_tank = population * per_person_min * days_of_storage
 
-from  .sim_rainwater import dynamic_coefficient, evaporation_loss, simulate_system_annual
+    # Upper bound = whichever is smaller: annual demand or potential
+    upper_bound = min(potential, demand)
 
-def estimate_rainwater_potential(area_m2, rainfall_mm, humidity, temp, coefficient=0.8):
-    """Estimate annual harvestable rainwater (liters) considering humidity & evaporation."""
-    efficiency = dynamic_coefficient(coefficient, humidity)
-    rain_collected = area_m2 * rainfall_mm * efficiency
+    # Recommend somewhere between
+    tank_size = max(min_tank, upper_bound * safety_factor)
 
-    # evaporation loss (tank surface ≈ 10% of roof area, assume 365 days)
-    evap = evaporation_loss(temp, 365, area_m2 * 0.1)
-    return max(0, rain_collected - evap)
-
-
-def estimate_water_demand(population, usage_per_day=135):
-    """Estimate annual water demand (liters)."""
-    return population * usage_per_day * 365
-
-
-def estimate_tank_size(potential, demand):
-    """Suggest tank size (liters)."""
-    return min(potential, demand)
+    return tank_size
 
 
 def estimate_cost(tank_size, cost_per_liter=2.5):
@@ -27,8 +20,8 @@ def estimate_cost(tank_size, cost_per_liter=2.5):
     return tank_size * cost_per_liter
 
 
-def feasibility_score(area_m2, rainfall_mm, temp, humidity, population,
-                      budget=None, tank_capacity=20000, groundwater_capacity=50000):
+def feasibility_score(area_m2, rainfall_mm, temp, humidity, population, 
+                      roof_type, budget=None, tank_capacity=20000, groundwater_capacity=50000):
     """
     Compute feasibility using the detailed annual simulation.
     Returns a score (0-100) and key stats.
@@ -40,31 +33,27 @@ def feasibility_score(area_m2, rainfall_mm, temp, humidity, population,
         area_m2=area_m2,
         population=population,
         tank_capacity=tank_capacity,
-        groundwater_capacity=groundwater_capacity
+        groundwater_capacity=groundwater_capacity,
+        rooftype= roof_type
     )
 
     cost = estimate_cost(tank_capacity)
 
-    score = 0
-    # Supply vs demand
-    if total_supply >= 0.8 * demand_total:
-        score += 40
-    elif total_supply >= 0.5 * demand_total:
-        score += 20
+    # Start with reliability (main indicator)
+    score = reliability_ratio * 70  # 0.0-1.0 → 0-70 points
 
-    # Reliability
-    if reliability_ratio >= 0.9:
-        score += 30
-    elif reliability_ratio >= 0.7:
-        score += 20
-    else:
-        score += 10
+    # Penalize unmet demand (10 points max)
+    unmet_ratio = unmet / demand_total if demand_total > 0 else 0
+    score += max(0, 10 * (1 - unmet_ratio))
 
-    # Budget
-    if budget and cost <= budget:
-        score += 30
+    # Budget factor (20 points max)
+    if budget:
+        if cost <= budget:
+            score += 20
+        else:
+            score += max(0, 20 * (budget / cost))
     else:
-        score += 10
+        score +=20
 
     return {
         "score": min(score, 100),
@@ -76,20 +65,20 @@ def feasibility_score(area_m2, rainfall_mm, temp, humidity, population,
         "gw_left": gw_left
     }
 
-def recommend_system(area_m2, rainfall_mm, temp, humidity, population,
-                     budget=None, tank_capacity=None, groundwater_capacity=50000):
+def recommend_system(area_m2, rainfall_mm, temp, humidity, population, roof_type,
+                     budget=None, groundwater_capacity=50000):
 
     # Step 1: estimate potential & demand
-    potential = estimate_rainwater_potential(area_m2, rainfall_mm, humidity, temp)
+    potential = estimate_rainwater_potential(area_m2, rainfall_mm, humidity, temp, roof_type)
     demand = estimate_water_demand(population)
 
     # Step 2: estimate required tank size if not provided
     # if not tank_capacity:
-    tank_capacity = estimate_tank_size(potential, demand)
+    tank_capacity = estimate_tank_size(potential, demand, population)
 
     # Step 3: get feasibility with this tank size
     result = feasibility_score(area_m2, rainfall_mm, temp, humidity,
-                               population, budget, tank_capacity, groundwater_capacity)
+                               population,roof_type, budget, tank_capacity, groundwater_capacity)
 
     supply = result["supply"]
     gw_left = result["gw_left"]
