@@ -35,7 +35,7 @@ def get_recommendation(req: RainRequest):
         population=req.population,
         budget=req.budget,
         tank_capacity=req.tank_capacity,
-        groundwater_capacity=req.groundwater_capacity,
+        groundwater_capacity=800,
         state = req.state,
         city = req.city
     )   
