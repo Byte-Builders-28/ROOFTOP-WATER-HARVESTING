@@ -11,4 +11,3 @@ class RainRequest(BaseModel):
 
     # Optional fields
     budget: Optional[float] = None
-    tank_capacity: Optional[float] = None

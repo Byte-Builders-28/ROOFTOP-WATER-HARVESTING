@@ -27,17 +27,16 @@ def read_root():
 # def fetch_groundwater(db: Session = Depends(database.get_db)):
 #    return get_groundwater(db)
 
-@router.post("/rain")
+@router.post("/api/get_res")
 def get_recommendation(req: RainRequest):
     area_m2 = req.area * 0.092903
     result = get_RTWH(
         area_m2=area_m2,
         population=req.population,
         budget=req.budget,
-        tank_capacity=req.tank_capacity,
-        groundwater_capacity=800,
         state = req.state,
-        city = req.city
+        city = req.city,
+        rooftype= req.roof
     )   
     return result
 
