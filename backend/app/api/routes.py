@@ -27,7 +27,7 @@ def read_root():
 # def fetch_groundwater(db: Session = Depends(database.get_db)):
 #    return get_groundwater(db)
 
-@router.post("/recommend")
+@router.post("/rain")
 def get_recommendation(req: RainRequest):
     area_m2 = req.area * 0.092903
     result = get_RTWH(

@@ -94,7 +94,7 @@ def simulate_system_annual(
 
     # Rainwater collected over the year
     efficiency = dynamic_coefficient(0.8, avg_humidity)
-    rain_collected = avg_rainfall * area_m2 * efficiency * 0.001  # mm*m² → liters
+    rain_collected = avg_rainfall * area_m2 * efficiency
 
     # Evaporation loss (tank surface ~10% of area)
     evap = evaporation_loss(avg_temp, days, area_m2 * 0.1)
@@ -102,7 +102,8 @@ def simulate_system_annual(
 
     # Start tank and groundwater
     tank_level = rain_collected
-    gw_level = groundwater_capacity * 0.5
+    gw_level = min(demand_total, groundwater_capacity * 0.5)
+
 
     # Handle tank overflow
     if tank_level > tank_capacity:

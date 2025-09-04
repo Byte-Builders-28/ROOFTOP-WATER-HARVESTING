@@ -1,11 +1,11 @@
-# services/rainfall_engine.py
+
 
 from  .sim_rainwater import dynamic_coefficient, evaporation_loss, simulate_system_annual
 
 def estimate_rainwater_potential(area_m2, rainfall_mm, humidity, temp, coefficient=0.8):
     """Estimate annual harvestable rainwater (liters) considering humidity & evaporation."""
     efficiency = dynamic_coefficient(coefficient, humidity)
-    rain_collected = area_m2 * rainfall_mm * efficiency * 0.001  # mm*m² → liters
+    rain_collected = area_m2 * rainfall_mm * efficiency
 
     # evaporation loss (tank surface ≈ 10% of roof area, assume 365 days)
     evap = evaporation_loss(temp, 365, area_m2 * 0.1)
@@ -84,8 +84,8 @@ def recommend_system(area_m2, rainfall_mm, temp, humidity, population,
     demand = estimate_water_demand(population)
 
     # Step 2: estimate required tank size if not provided
-    if not tank_capacity:
-        tank_capacity = estimate_tank_size(potential, demand)
+    # if not tank_capacity:
+    tank_capacity = estimate_tank_size(potential, demand)
 
     # Step 3: get feasibility with this tank size
     result = feasibility_score(area_m2, rainfall_mm, temp, humidity,
