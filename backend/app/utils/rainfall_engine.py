@@ -61,8 +61,8 @@ def get_RTWH(
         humidity=humidity,
         population=population,
         budget=budget,
-        tank_capacity=tank_capacity,
-        groundwater_capacity=groundwater_capacity
+        tank_capacity=tank_capacity
+        # groundwater_capacity=groundwater_capacity
     )
     print(f"[DEBUG] Recommendation result: {result}")
 

@@ -29,8 +29,9 @@ def read_root():
 
 @router.post("/recommend")
 def get_recommendation(req: RainRequest):
+    area_m2 = req.area * 0.092903
     result = get_RTWH(
-        area_m2=req.area_m2,
+        area_m2=area_m2,
         population=req.population,
         budget=req.budget,
         tank_capacity=req.tank_capacity,
