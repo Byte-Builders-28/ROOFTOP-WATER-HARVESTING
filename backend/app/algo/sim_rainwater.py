@@ -35,7 +35,8 @@ def estimate_rainwater_potential(area_m2, rainfall_mm, humidity, temp, roof_type
     "Thatched": 0.35,
     "Plastic Sheet / PVC": 0.85,
     "Glass": 0.90,
-    "Green Roof (vegetated)": 0.30
+    "Green Roof (vegetated)": 0.30,
+    "Other": 0.75
     }
 
     coefficient = roof_coefficients[roof_type]
