@@ -27,14 +27,14 @@ def classify_location(location: str, regions: list[str]) -> str:
     Only return the region name, nothing else.
     """
 
-    model = genai.GenerativeModel("gemini-2.5-pro")
+    model = genai.GenerativeModel("gemini-2.5-flash-lite")
     response = model.generate_content(prompt)
 
     return response.text.strip()
 
 
-# Example usage
-regions = ["North India", "South India", "West India", "East India"]
-location = "Goa"
+# # Example usage
+# regions = ["North India", "South India", "West India", "East India"]
+# location = "Goa"
 
-print("Region:", classify_location(location, regions))
+# print("Region:", classify_location(location, regions))

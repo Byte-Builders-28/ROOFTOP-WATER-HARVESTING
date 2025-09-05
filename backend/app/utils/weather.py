@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 import requests
 
-from utils.location import get_location_details
+from backend.app.utils.location import get_location_details
 
 def get_info_from_location(state: str, city: str):
     """
