@@ -25,10 +25,6 @@ router = APIRouter(prefix="/api")
 @router.get("/")
 def read_root():
    return {"message" : "FastApi is running"}
-   
-# @router.get("/fetch-groundwater")
-# def fetch_groundwater(db: Session = Depends(database.get_db)):
-#    return get_groundwater(db)
 
 @router.post("/get_res")
 def get_recommendation(req: RainRequest):
