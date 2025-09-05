@@ -7,8 +7,7 @@ from datetime import datetime
 
 from ..utils.rainfall_engine import get_RTWH
 
-from .models import RainRequest
-from pydantic import BaseModel
+from .models import RainRequest, WaterInput
 from app.algo.ML.water_budget_model import predict_water_risk
 
 
@@ -21,7 +20,7 @@ from app.algo.ML.water_budget_model import predict_water_risk
 #     "hashed_password": get_password_hash("mypassword")
 # }
 
-router = APIRouter()
+router = APIRouter(prefix="/api")
 
 @router.get("/")
 def read_root():
@@ -31,7 +30,7 @@ def read_root():
 # def fetch_groundwater(db: Session = Depends(database.get_db)):
 #    return get_groundwater(db)
 
-@router.post("/api/get_res")
+@router.post("/get_res")
 def get_recommendation(req: RainRequest):
     area_m2 = req.area * 0.092903
     result = get_RTWH(
@@ -56,15 +55,8 @@ def get_recommendation(req: RainRequest):
 # Anirban ML Logics
 # ml_router = APIRouter(prefix="/ml", tags=["Machine Learning"])
 
-class WaterInput(BaseModel):
-    tank_cap: int
-    current_level: int
-    dwellers: int
-    avg_need: int
-    rain_next7: float
-    dry_days: int
 
-@ml_router.post("/predict")
+@router.post("/predict")
 def get_prediction(data: WaterInput):
     result = predict_water_risk(
         data.tank_cap,
