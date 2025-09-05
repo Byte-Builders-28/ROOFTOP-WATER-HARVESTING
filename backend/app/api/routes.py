@@ -10,6 +10,8 @@ from ..utils.rainfall_engine import get_RTWH
 
 from models import RainRequest
 
+from ..algo.water_budget_ML import calculate_daily_budget
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl = "login")
 
 # Fake user db (later you’ll use your actual database)
@@ -52,3 +54,16 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 @router.get("/profile")
 def read_profile(current_user: str = Depends(get_current_user)):
     return {"msg": f"Hello {current_user}, welcome to your profile!"}
+
+
+# Anirban ML Logics
+@router.get("/water-budget/")
+def water_budget_endpoint(
+    storage_capacity: float,
+    current_level: float,
+    dwellers: int,
+    location: str,
+    current_date: str
+):
+    # budget = calculate_daily_budget(storage_capacity, current_level, dwellers, location, current_date)
+    # return {"water_budget": budget}
