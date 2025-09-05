@@ -56,7 +56,7 @@ def get_recommendation(req: RainRequest):
 # ml_router = APIRouter(prefix="/ml", tags=["Machine Learning"])
 
 
-@router.post("/predict")
+@router.post("/ml/predict")
 def get_prediction(data: WaterInput):
     result = predict_water_risk(
         data.tank_cap,
