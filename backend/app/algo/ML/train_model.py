@@ -1,28 +1,45 @@
 import pandas as pd
+from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 import pickle
 import os
 
-def train_model():
-    # Load dataset
-    df = pd.read_csv("...data_engineering/data/synthetic_training.csv")
+DATA_PATH = "../../../../data_engineering/data/synthetic_training.csv"
+MODEL_DIR = "ML_models"
+MODEL_PATH = os.path.join(MODEL_DIR, "water_risk_model.pkl")
 
-    # Features and target
-    X = df[["tank_cap", "current_level", "dwellers", "avg_need", "rain_next7", "dry_days"]]
-    y = df["risk"]
+def train_and_save_model():
+    # Load dataset
+    df = pd.read_csv(DATA_PATH)
+
+    X = df[["TankCap","CurrentLevel","Dwellers","AvgNeed","RainNext7","DryDays","ModeClass","PerPersonBudget"]]
+        # If 'label' column doesn't exist, create it using a rule
+    if "label" not in df.columns:
+        df["label"] = df.apply(lambda row: 1 if (
+            row["CurrentLevel"] < 0.3 * row["TankCap"] and row["RainNext7"] < 20
+        ) else 0, axis=1)
+
+    y = df["label"]
+    # Train-test split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
 
     # Train model
-    model = DecisionTreeClassifier(max_depth=5, random_state=42)
-    model.fit(X, y)
+    clf = DecisionTreeClassifier(max_depth=5, random_state=42)
+    clf.fit(X_train, y_train)
 
-    # Ensure models dir exists
-    os.makedirs("models", exist_ok=True)
+    # Ensure model dir exists
+    os.makedirs(MODEL_DIR, exist_ok=True)
 
-    # Save model
-    with open("ML_models/water_risk_model.pkl", "wb") as f:
-        pickle.dump(model, f)
+    # Save trained model
+    with open(MODEL_PATH, "wb") as f:
+        pickle.dump(clf, f)
 
-    print("✅ Model trained and saved at models/water_risk_model.pkl")
+    print(f"✅ Model trained and saved at {MODEL_PATH}")
 
 if __name__ == "__main__":
-    train_model()
+    train_and_save_model()
+
+
+
