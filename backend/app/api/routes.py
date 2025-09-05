@@ -8,7 +8,8 @@ from datetime import datetime
 from ..utils.rainfall_engine import get_RTWH
 
 from .models import RainRequest
-from ..algo.water_budget_ML import calculate_daily_budget
+from pydantic import BaseModel
+from app.algo.ML.water_budget_model import predict_water_risk
 
 
 # oauth2_scheme = OAuth2PasswordBearer(tokenUrl = "login")
@@ -53,15 +54,24 @@ def get_recommendation(req: RainRequest):
 
 
 # Anirban ML Logics
-@router.get("/api/water-budget")
-def water_budget_endpoint(
-    storage_capacity: float,
-    current_level: float,
-    dwellers: int,
-    location: str,
-    current_date: str
-):
-  pass
-    # budget = calculate_daily_budget(storage_capacity, current_level, dwellers, location, current_date)
-    # return {"water_budget": budget}
+# ml_router = APIRouter(prefix="/ml", tags=["Machine Learning"])
 
+class WaterInput(BaseModel):
+    tank_cap: int
+    current_level: int
+    dwellers: int
+    avg_need: int
+    rain_next7: float
+    dry_days: int
+
+@ml_router.post("/predict")
+def get_prediction(data: WaterInput):
+    result = predict_water_risk(
+        data.tank_cap,
+        data.current_level,
+        data.dwellers,
+        data.avg_need,
+        data.rain_next7,
+        data.dry_days,
+    )
+    return result
