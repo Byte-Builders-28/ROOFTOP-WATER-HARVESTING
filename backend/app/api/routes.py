@@ -8,7 +8,7 @@ from datetime import datetime
 from ..utils.rainfall_engine import get_RTWH
 
 from .models import RainRequest, WaterInput
-# from ..algo.ML.water_budget_model import predict_water_risk
+from ..algo.ML.water_budget_model import predict_water_risk
 
 
 # oauth2_scheme = OAuth2PasswordBearer(tokenUrl = "login")
@@ -52,14 +52,14 @@ def get_recommendation(req: RainRequest):
 # ml_router = APIRouter(prefix="/ml", tags=["Machine Learning"])
 
 
-# @router.post("/ml/predict")
-# def get_prediction(data: WaterInput):
-#     result = predict_water_risk(
-#         data.tank_cap,
-#         data.current_level,
-#         data.dwellers,
-#         data.avg_need,
-#         data.rain_next7,
-#         data.dry_days,
-#     )
-#     return result
+@router.post("/ml/predict")
+def get_prediction(data: WaterInput):
+    result = predict_water_risk(
+        data.tank_cap,
+        data.current_level,
+        data.dwellers,
+        data.avg_need,
+        data.rain_next7,
+        data.dry_days,
+    )
+    return result
