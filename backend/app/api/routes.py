@@ -57,7 +57,7 @@ def get_recommendation(req: RainRequest):
 def get_prediction(data: WaterInput):
 
     rain_next7 = get_next5days_rain(data.state, data.city)
-    dry_days = 0 if rain_next7 > 0 else 7
+    dry_days = 0 if max(rain_next7) > 0 else 7
     
     result = predict_water_risk(
         data.tank_cap,
