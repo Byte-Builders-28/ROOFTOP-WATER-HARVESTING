@@ -62,7 +62,7 @@ def get_prediction(data: WaterInput):
     result = predict_water_risk(
         data.tank_cap,
         data.current_level,
-        data.dwellers,
+        data.population,
         data.avg_need,
         rain_next7,
         dry_days,

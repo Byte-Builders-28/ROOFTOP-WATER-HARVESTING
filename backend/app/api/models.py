@@ -16,7 +16,7 @@ class WaterInput(BaseModel):
     city: str
     tank_cap: int
     current_level: int
-    dwellers: int
+    population: int
     avg_need: Optional[int] = 135
     # rain_next7: float
     # dry_days: Optional

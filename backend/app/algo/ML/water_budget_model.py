@@ -12,11 +12,13 @@ if not os.path.exists(MODEL_PATH):
 with open(MODEL_PATH, "rb") as f:
     model = pickle.load(f)
 
-def predict_water_risk(tank_cap, current_level, dwellers, avg_need, rain_next7, dry_days):
+def predict_water_risk(tank_cap, current_level, dwellers, avg_need, rain_next7_list, dry_days):
     """
     Predict water risk using trained DecisionTree model
     Returns risk, suggestion, and tips
     """
+    rain_next7 = sum(rain_next7_list) / len(rain_next7_list) if rain_next7_list else 0.0
+
     X = np.array([[tank_cap, current_level, dwellers, avg_need, rain_next7, dry_days]])
     risk = model.predict(X)[0]
 
@@ -40,4 +42,4 @@ def predict_water_risk(tank_cap, current_level, dwellers, avg_need, rain_next7, 
             "Clean rooftop filters regularly"
         ]
 
-    return {"risk": int(risk), "suggestion": suggestion, "tips": tips}
+    return {"risk": int(risk), "suggestion": suggestion, "tips": tips, "rains": rain_next7_list}
