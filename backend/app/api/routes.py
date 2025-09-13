@@ -6,7 +6,7 @@ from .auth import create_access_token, verify_password, get_password_hash, get_c
 from datetime import datetime
 
 from ..utils.rainfall_engine import get_RTWH
-from ..utils.weather import get_next5days_avg_rain
+from ..utils.weather import get_next5days_rain
 
 from .models import RainRequest, WaterInput
 from ..algo.ML.water_budget_model import predict_water_risk
@@ -56,7 +56,7 @@ def get_recommendation(req: RainRequest):
 @router.post("/ml/predict")
 def get_prediction(data: WaterInput):
 
-    rain_next7 = get_next5days_avg_rain(data.state, data.city)
+    rain_next7 = get_next5days_rain(data.state, data.city)
     dry_days = 0 if rain_next7 > 0 else 7
     
     result = predict_water_risk(
