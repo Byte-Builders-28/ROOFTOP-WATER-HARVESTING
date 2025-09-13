@@ -61,3 +61,60 @@ def get_info_from_location(state: str, city: str):
     print(f"[DEBUG] Final weather info: {result}")
 
     return result
+
+
+def get_next5days_avg_rain(state: str, city: str) -> float:
+    """
+    Returns the average daily rainfall (mm) for the next 5 days as a float.
+    """
+    print(f"[DEBUG] get_next5days_avg_rain called with state={state}, city={city}")
+
+    # Load API key
+    load_dotenv()
+    API_KEY = os.getenv("OPENWEATHER_API_KEY")
+    if not API_KEY:
+        print("[ERROR] OPENWEATHER_API_KEY not found in .env")
+        return 0.0
+
+    # Get latitude/longitude
+    location = get_location_details(f"{city}, {state}")
+    print(f"[DEBUG] Location details: {location}")
+
+    if not location:
+        print(f"[ERROR] Could not resolve coordinates for {city}, {state}")
+        return 0.0
+
+    lat, lon = location.get("latitude"), location.get("longitude")
+    if lat is None or lon is None:
+        print(f"[ERROR] Missing latitude/longitude in location: {location}")
+        return 0.0
+
+    # Query 5-day forecast (3-hour steps)
+    url = f"https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={API_KEY}&units=metric"
+    print(f"[DEBUG] OpenWeather request URL: {url}")
+
+    try:
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as e:
+        print(f"[ERROR] Request to OpenWeather failed: {e}")
+        return 0.0
+
+    # Parse rainfall forecast (aggregate per day)
+    rain_by_day = {}
+    for entry in data.get("list", []):
+        dt_txt = entry.get("dt_txt")  # "2025-09-13 15:00:00"
+        date = dt_txt.split(" ")[0] if dt_txt else None
+        rain_mm = entry.get("rain", {}).get("3h", 0.0)
+        if date:
+            rain_by_day[date] = rain_by_day.get(date, 0.0) + rain_mm
+
+    # Take only next 5 days
+    next5days = list(rain_by_day.values())[:5]
+
+    if not next5days:
+        return 0.0
+
+    avg_rain = sum(next5days) / len(next5days)
+    return round(avg_rain, 2)

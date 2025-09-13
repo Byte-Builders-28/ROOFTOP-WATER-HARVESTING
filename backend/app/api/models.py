@@ -12,9 +12,11 @@ class RainRequest(BaseModel):
     # Optional fields
     budget: Optional[float] = None
 class WaterInput(BaseModel):
+    state: str
+    city: str
     tank_cap: int
     current_level: int
     dwellers: int
-    avg_need: int
-    rain_next7: float
-    dry_days: int
+    avg_need: Optional[int] = 135
+    # rain_next7: float
+    # dry_days: Optional
