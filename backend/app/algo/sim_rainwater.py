@@ -73,17 +73,19 @@ def simulate_system_annual(
     # Total annual demand
     demand_total = estimate_water_demand(population, usage_per_day)
     # Rainwater collected over the year
-    rain_collected = estimate_rainwater_potential(area_m2,avg_rainfall,avg_humidity,avg_temp, roof_type= rooftype)
+    rain_collected = estimate_rainwater_potential(area_m2, avg_rainfall, avg_humidity, avg_temp, roof_type=rooftype)
 
     # Start tank and groundwater
     tank_level = rain_collected
     gw_level = min(demand_total, groundwater_capacity * 0.5)
+    recharge_total = 0  # track recharge
 
-    tank_capacity *= 12 # so it spans 1 y.. tank is for 30 days
+    tank_capacity *= 12  # so it spans 1 y.. tank is for 30 days
 
     # Handle tank overflow
     if tank_level > tank_capacity:
         recharge = (tank_level - tank_capacity) * soil_infiltration
+        recharge_total += recharge
         gw_level = min(groundwater_capacity, gw_level + recharge)
         tank_level = tank_capacity
 
@@ -109,7 +111,8 @@ def simulate_system_annual(
             gw_level = 0
             reliability_ratio = total_supply / demand_total
 
-    return total_supply, demand_total, reliability_ratio, unmet, gw_level
+    return total_supply, demand_total, reliability_ratio, unmet, recharge_total
+
 
 
 def simulate_system_month(
