@@ -12,7 +12,7 @@ def train_and_save_model():
     # Load dataset
     df = pd.read_csv(DATA_PATH)
 
-    X = df[["TankCap","CurrentLevel","Dwellers","AvgNeed","RainNext7","DryDays","ModeClass","PerPersonBudget"]]
+    X = df[["TankCap","CurrentLevel","Dwellers","AvgNeed","RainNext7","DryDays"]]
         # If 'label' column doesn't exist, create it using a rule
     if "label" not in df.columns:
         df["label"] = df.apply(lambda row: 1 if (
