@@ -15,7 +15,7 @@ def estimate_tank_size(potential, demand, population ,days_of_storage = 30, per_
     return tank_size
 
 
-def estimate_cost(tank_size, cost_per_liter=2.5):
+def estimate_cost(tank_size, cost_per_liter=8.5):
     """Rough cost based on tank size."""
     return tank_size * cost_per_liter
 
