@@ -1,18 +1,32 @@
 from  .sim_rainwater import simulate_system_annual, estimate_rainwater_potential,estimate_water_demand
 
-def estimate_tank_size(potential, demand, population ,days_of_storage = 30, per_person_min=135,safety_factor=0.4):
+def estimate_tank_size(
+    potential,
+    demand,
+    population,
+    days_of_storage=30,
+    per_person_min=135,
+    scale_factor=0.5
+):
     """
-    Suggest a realistic tank size considering annual potential, population, and variability.
+    Suggest a realistic tank size:
+    - Minimum: family storage for given days.
+    - Maximum: whichever is smaller (annual potential or demand).
+    - Recommended: somewhere between min and max, controlled by scale_factor (0-1).
     """
+
     min_tank = population * per_person_min * days_of_storage
+    ceiling = min(potential, demand)
 
-    # Upper bound = whichever is smaller: annual demand or potential
-    upper_bound = min(potential, demand)
+    if ceiling <= min_tank:
+        # Not much potential → just stick with minimum
+        return min_tank
 
-    # Recommend somewhere between
-    tank_size = max(min_tank, upper_bound * safety_factor)
+    # Scale between min_tank and ceiling
+    tank_size = min_tank + (ceiling - min_tank) * scale_factor
 
     return tank_size
+
 
 
 def estimate_cost(tank_size, cost_per_liter=8.5):

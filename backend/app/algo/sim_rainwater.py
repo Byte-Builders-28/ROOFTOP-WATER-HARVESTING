@@ -89,6 +89,11 @@ def simulate_system_annual(
         gw_level = min(groundwater_capacity, gw_level + recharge)
         tank_level = tank_capacity
 
+    # NEW: Natural infiltration recharge from rainfall
+    natural_recharge = rain_collected * 0.1 * soil_infiltration  # 10% of collected rain goes into ground
+    gw_level = min(groundwater_capacity, gw_level + natural_recharge)
+    recharge_total += natural_recharge
+
     # Supply demand from tank first
     if tank_level >= demand_total:
         tank_level -= demand_total
@@ -112,58 +117,3 @@ def simulate_system_annual(
             reliability_ratio = total_supply / demand_total
 
     return total_supply, demand_total, reliability_ratio, unmet, recharge_total
-
-
-
-def simulate_system_month(
-    monthly_rainfall, monthly_temp, monthly_humidity,
-    area_m2, population, usage_per_day=135,
-    tank_capacity=20000, groundwater_capacity=50000,
-    soil_infiltration=0.5  # 0-1 fraction
-):
-    """Simulate integrated rainwater harvesting + groundwater recharge."""
-
-    demand_monthly = usage_per_day * population * 30
-    tank_level, gw_level = 0, groundwater_capacity * 0.5  # start at half full
-    total_supply, unmet, reliability = 0, 0, 0
-
-    for m in range(12):
-        # Rainwater collected
-        efficiency = dynamic_coefficient(0.8, monthly_humidity[m])
-        rain_collected = monthly_rainfall[m] * area_m2 * efficiency * 0.001
-
-        # Evaporation loss (tank surface ~10% of area)
-        evap = evaporation_loss(monthly_temp[m], 30, area_m2 * 0.1)
-        rain_collected = max(0, rain_collected - evap)
-
-        # Add to tank
-        tank_level += rain_collected
-
-        # If overflow, recharge groundwater
-        if tank_level > tank_capacity:
-            recharge = (tank_level - tank_capacity) * soil_infiltration
-            gw_level = min(groundwater_capacity, gw_level + recharge)
-            tank_level = tank_capacity
-
-        # Meet demand
-        if tank_level >= demand_monthly:
-            tank_level -= demand_monthly
-            total_supply += demand_monthly
-            reliability += 1
-        else:
-            demand_left = demand_monthly - tank_level
-            total_supply += tank_level
-            tank_level = 0
-
-            if gw_level >= demand_left:
-                gw_level -= demand_left
-                total_supply += demand_left
-                reliability += 1
-            else:
-                total_supply += gw_level
-                unmet += demand_left - gw_level
-                gw_level = 0
-
-    reliability_ratio = reliability / 12
-    demand_total = demand_monthly * 12
-    return total_supply, demand_total, reliability_ratio, unmet, gw_level
