@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Rooftop Harvesting AR</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<!-- A-Frame -->
+		<script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+		<!-- MindAR -->
+		<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.3/dist/mindar-image-aframe.prod.js"></script>
+
+		<style>
+			html,
+			body {
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+				width: 100%;
+				height: 100%;
+			}
+		</style>
+	</head>
+	<body>
+		<a-scene
+			id="ar-scene"
+			mindar-image="imageTargetSrc: ./targets.mind; autoStart: true;"
+			vr-mode-ui="enabled: false"
+			device-orientation-permission-ui="enabled: false"
+			embedded>
+			<a-camera position="0 0 0" look-controls="enabled: true"></a-camera>
+
+			<!-- 3D model entity -->
+			<a-entity
+				id="ar-model"
+				gltf-model="./water_tank.glb"
+				mindar-image-target="0"
+				scale="0.2 0.2 0.2"
+				position="0 0 0"></a-entity>
+
+			<a-entity
+				light="type: ambient; color: #ffffff; intensity: 0.5"></a-entity>
+		</a-scene>
+
+		<script>
+			// Map model names to GLB files
+			const models = {
+				tank: "./water_tank.glb",
+				pit: "./pit.glb",
+				filter: "./filter.glb",
+			};
+
+			// Map target names to MindAR files
+			const targets = {
+				default: "./targets.mind",
+				special: "./special_target.mind",
+			};
+
+			const entity = document.querySelector("#ar-model");
+			const scene = document.querySelector("#ar-scene");
+
+			function setModel(modelName) {
+				if (models[modelName]) {
+					entity.setAttribute("gltf-model", models[modelName]);
+				}
+			}
+
+			function setTarget(targetName) {
+				if (targets[targetName]) {
+					scene.setAttribute(
+						"mindar-image",
+						`imageTargetSrc: ${targets[targetName]}; autoStart: true;`
+					);
+				}
+			}
+
+			// Listen for messages from React Native WebView
+			window.addEventListener("message", (event) => {
+				try {
+					const data = JSON.parse(event.data);
+					if (data.model) setModel(data.model);
+					if (data.target) setTarget(data.target);
+				} catch (e) {
+					console.error("Invalid message received", e);
+				}
+			});
+
+			// Set default model and target on load
+			setModel("tank");
+			setTarget("default");
+
+			// Expose globally for debugging (optional)
+			window.setModel = setModel;
+			window.setTarget = setTarget;
+		</script>
+	</body>
+</html>
