@@ -1,97 +1,99 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 	<head>
-		<meta charset="utf-8" />
-		<title>Rooftop Harvesting AR</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-		<!-- A-Frame -->
-		<script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-		<!-- MindAR -->
-		<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.3/dist/mindar-image-aframe.prod.js"></script>
-
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 		<style>
-			html,
-			body {
-				margin: 0;
-				padding: 0;
-				overflow: hidden;
-				width: 100%;
-				height: 100%;
+			#buttons {
+				position: absolute;
+				bottom: 5vh;
+				left: 50%;
+				transform: translateX(-50%);
+				display: flex;
+				gap: 10px;
+				z-index: 9999;
+			}
+			button {
+				padding: 8px 14px;
+				font-size: 14px;
+				border: none;
+				border-radius: 6px;
+				cursor: pointer;
+				background: #1976d2;
+				color: white;
+			}
+			button:hover {
+				background: #125a9c;
 			}
 		</style>
+		<script>
+			const modelData = {
+				tank: {
+					path: "./models/water_tank.glb",
+					scale: "0.3 0.3 0.3",
+					offsetY: -0.05,
+				},
+				filter: {
+					path: "./models/filter.glb",
+					scale: "0.15 0.15 0.15",
+					offsetY: -0.03,
+				},
+				pit: {
+					path: "./models/pit.glb",
+					scale: "0.06 0.06 0.06",
+					offsetY: -0.08,
+				},
+			};
+
+			function setModel(name) {
+				const modelEntity = document.querySelector("#dynamicModel");
+				const parentEntity = document.querySelector("#modelParent");
+
+				if (!modelData[name]) return;
+
+				modelEntity.setAttribute("gltf-model", modelData[name].path);
+				modelEntity.setAttribute("scale", modelData[name].scale);
+				parentEntity.setAttribute("position", `0 ${modelData[name].offsetY} 0`);
+			}
+
+			// Simple smoothing to reduce jitter
+			let lastPos = { x: 0, y: 0, z: 0 };
+			setInterval(() => {
+				const model = document.querySelector("#dynamicModel");
+				if (!model.object3D.visible) return;
+
+				const obj = model.object3D;
+				obj.position.x = obj.position.x * 0.2 + lastPos.x * 0.8;
+				obj.position.y = obj.position.y * 0.2 + lastPos.y * 0.8;
+				obj.position.z = obj.position.z * 0.2 + lastPos.z * 0.8;
+
+				lastPos = { x: obj.position.x, y: obj.position.y, z: obj.position.z };
+			}, 16);
+		</script>
 	</head>
 	<body>
+		<div id="buttons">
+			<button onclick="setModel('tank')">Water Tank</button>
+			<button onclick="setModel('filter')">Filter</button>
+			<button onclick="setModel('pit')">Pit</button>
+		</div>
+
 		<a-scene
-			id="ar-scene"
-			mindar-image="imageTargetSrc: ./targets.mind; autoStart: true;"
+			mindar-image="imageTargetSrc: ./targets.mind;"
+			color-space="sRGB"
+			renderer="colorManagement: true, physicallyCorrectLights"
 			vr-mode-ui="enabled: false"
-			device-orientation-permission-ui="enabled: false"
-			embedded>
-			<a-camera position="0 0 0" look-controls="enabled: true"></a-camera>
+			device-orientation-permission-ui="enabled: false">
+			<a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-			<!-- 3D model entity -->
-			<a-entity
-				id="ar-model"
-				gltf-model="./water_tank.glb"
-				mindar-image-target="0"
-				scale="0.2 0.2 0.2"
-				position="0 0 0"></a-entity>
-
-			<a-entity
-				light="type: ambient; color: #ffffff; intensity: 0.5"></a-entity>
+			<a-entity mindar-image-target="targetIndex: 0" id="modelParent">
+				<a-gltf-model
+					id="dynamicModel"
+					gltf-model="./water_tank.glb"
+					rotation="0 0 0"
+					scale="0.3 0.3 0.3">
+				</a-gltf-model>
+			</a-entity>
 		</a-scene>
-
-		<script>
-			// Map model names to GLB files
-			const models = {
-				tank: "./water_tank.glb",
-				pit: "./pit.glb",
-				filter: "./filter.glb",
-			};
-
-			// Map target names to MindAR files
-			const targets = {
-				default: "./targets.mind",
-				special: "./special_target.mind",
-			};
-
-			const entity = document.querySelector("#ar-model");
-			const scene = document.querySelector("#ar-scene");
-
-			function setModel(modelName) {
-				if (models[modelName]) {
-					entity.setAttribute("gltf-model", models[modelName]);
-				}
-			}
-
-			function setTarget(targetName) {
-				if (targets[targetName]) {
-					scene.setAttribute(
-						"mindar-image",
-						`imageTargetSrc: ${targets[targetName]}; autoStart: true;`
-					);
-				}
-			}
-
-			// Listen for messages from React Native WebView
-			window.addEventListener("message", (event) => {
-				try {
-					const data = JSON.parse(event.data);
-					if (data.model) setModel(data.model);
-					if (data.target) setTarget(data.target);
-				} catch (e) {
-					console.error("Invalid message received", e);
-				}
-			});
-
-			// Set default model and target on load
-			setModel("tank");
-			setTarget("default");
-
-			// Expose globally for debugging (optional)
-			window.setModel = setModel;
-			window.setTarget = setTarget;
-		</script>
 	</body>
 </html>
