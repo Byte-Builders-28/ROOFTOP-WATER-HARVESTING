@@ -60,6 +60,8 @@ def predict_water_risk(tank_cap, current_level, dwellers, avg_need, rain_next7_l
         overall_suggestion = "✅ Safe: Storage and water quality are acceptable."
 
     return {
+        "ph" : ph,
+        "tds": tds,
         "storage_risk": int(storage_risk),
         "storage_suggestion": storage_suggestion,
         "storage_tips": storage_tips,
