@@ -30,17 +30,26 @@ def get_recommendation(req: RainRequest):
     return result
 
 @router.post("/ml/predict")
-def get_prediction(data: WaterInput):
+def get_prediction(data: WaterInput, db: Session = Depends(database.get_db)):
+    # Fetch rain forecast
     rain_next7 = get_next5days_rain(data.state, data.city)
     dry_days = 0 if max(rain_next7) > 0 else 7
 
+    # Fetch water quality from DB using UUID
+    quality = crud.get_water_quality(db, data.uuid)
+    if not quality:
+        raise HTTPException(status_code=404, detail="Water quality data not found for this UUID")
+
+    # Call updated predict_water_risk with ph and tds
     result = predict_water_risk(
-        data.tank_cap,
-        data.current_level,
-        data.population,
-        data.avg_need,
-        rain_next7,
-        dry_days,
+        tank_cap=data.tank_cap,
+        current_level=data.current_level,
+        dwellers=data.population,
+        avg_need=data.avg_need,
+        rain_next7_list=rain_next7,
+        dry_days=dry_days,
+        ph=quality.ph,
+        tds=quality.tds
     )
     return result
 
