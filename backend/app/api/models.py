@@ -4,13 +4,14 @@ from typing import Optional
 class RainRequest(BaseModel):
     area: float
     population: int
-    # groundwater_capacity: float
     state: str
     city: str
     roof: str
 
     # Optional fields
     budget: Optional[float] = None
+
+
 class WaterInput(BaseModel):
     state: str
     city: str
@@ -18,5 +19,18 @@ class WaterInput(BaseModel):
     current_level: int
     population: int
     avg_need: Optional[int] = 135
-    # rain_next7: float
-    # dry_days: Optional
+
+
+# Input for saving WaterQuality
+class WaterQualityCreate(BaseModel):
+    uuid: str
+    ph: int
+    tds: int
+    diameter: float
+    water_depth: float
+
+
+# Output for reading WaterQuality
+class WaterQualityResponse(WaterQualityCreate):
+    class Config:
+        orm_mode = True

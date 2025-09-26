@@ -64,3 +64,12 @@ class AQI(Base):
     district = Column(String)
     data_value = Column(Float)
     data_time = Column(DateTime)
+
+class WaterQuality(Base):
+    __tablename__ = "water_quality"
+
+    uuid = Column(String, primary_key=True, index=True)
+    ph = Column(Integer, nullable=False)
+    tds = Column(Integer, nullable=False)
+    diameter = Column(Float, nullable=False)
+    water_depth = Column(Float, nullable=False)

@@ -102,3 +102,34 @@ def save_humidity(db: Session, records: list):
         )
         db.add(db_record)
     db.commit()
+    
+def save_water_quality(db: Session, data):
+    """
+    Insert or update a water quality record for a given UUID.
+    If the UUID exists, update its values. Otherwise, insert new.
+    """
+    db_item = db.query(models.WaterQuality).filter(models.WaterQuality.uuid == data.uuid).first()
+
+    if db_item:
+        # Update existing row
+        db_item.ph = data.ph
+        db_item.tds = data.tds
+        db_item.diameter = data.diameter
+        db_item.water_depth = data.water_depth
+    else:
+        # Insert new row
+        db_item = models.WaterQuality(
+            uuid=data.uuid,
+            ph=data.ph,
+            tds=data.tds,
+            diameter=data.diameter,
+            water_depth=data.water_depth
+        )
+        db.add(db_item)
+
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
+def get_water_quality(db: Session, uuid: str):
+    return db.query(models.WaterQuality).filter(models.WaterQuality.uuid == uuid).first()
