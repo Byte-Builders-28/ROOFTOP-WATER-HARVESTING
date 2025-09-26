@@ -4,6 +4,8 @@ import os
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
+from fastapi.middleware.cors import CORSMiddleware
+
 from .db import models, database
 # from app.api.routes import router 
 from .api.routes import router
@@ -12,6 +14,19 @@ from .api.routes import router
 models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:8000",   # React/Vue dev server
+    "https://yourdomain.com",  # Production frontend
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],          # list of allowed origins
+    allow_credentials=True,
+    allow_methods=["*"],            # allow all HTTP methods
+    allow_headers=["*"],            # allow all headers
+)
 
 # Absolute path to the 'webar' folder
 current_dir = os.path.dirname(os.path.abspath(__file__))
