@@ -34,4 +34,4 @@ class WaterQualityCreate(BaseModel):
 # Output for reading WaterQuality
 class WaterQualityResponse(WaterQualityCreate):
     class Config:
-        orm_mode = True
+        from_attributes = True
