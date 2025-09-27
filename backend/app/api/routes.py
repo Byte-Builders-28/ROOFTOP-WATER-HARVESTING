@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException,Query
 from sqlalchemy.orm import Session
 from ..db import crud, database
 from .auth import create_access_token, verify_password, get_password_hash, get_current_user
@@ -15,6 +15,35 @@ router = APIRouter(prefix="/api")
 @router.get("/")
 def read_root():
    return {"message" : "FastApi is running"}
+
+from typing import Optional
+from ..utils.location import get_location_details, get_address_from_coords  # your functions
+
+
+@router.get("/geocode")
+def geocode(
+    address: Optional[str] = Query(None, description="Address string for forward geocoding"),
+    lat: Optional[float] = Query(None, description="Latitude for reverse geocoding"),
+    lng: Optional[float] = Query(None, description="Longitude for reverse geocoding")
+):
+    """
+    Single geocode route:
+    - Forward mode: provide 'address' → returns coordinates
+    - Reverse mode: provide 'lat' and 'lng' → returns address details
+    """
+    if address:
+        result = get_location_details(address)
+        if not result:
+            raise HTTPException(status_code=404, detail=f"Could not find coordinates for: {address}")
+        return {"mode": "forward", **result}
+    
+    if lat is not None and lng is not None:
+        result = get_address_from_coords(lat, lng)
+        if not result:
+            raise HTTPException(status_code=404, detail=f"Could not find address for coordinates: {lat}, {lng}")
+        return {"mode": "reverse", **result}
+    
+    raise HTTPException(status_code=400, detail="Provide either 'address' or 'lat' and 'lng'")
 
 @router.post("/get_res")
 def get_recommendation(req: RainRequest):

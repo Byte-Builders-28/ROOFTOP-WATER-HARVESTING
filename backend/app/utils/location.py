@@ -48,3 +48,28 @@ def get_location_details(address):
     except (GeocoderTimedOut, GeocoderServiceError) as e:
         print(f"[ERROR] Geocoding service error: {e}")
         return None
+
+def get_address_from_coords(lat: float, lng: float):
+    """
+    Fetches address details for given latitude and longitude using Nominatim.
+    Returns city, state, full address, and raw data.
+    """
+    geolocator = Nominatim(user_agent="location_fetcher")
+    try:
+        location = geolocator.reverse((lat, lng), timeout=10)
+        if location:
+            components = location.raw.get("address", {})
+            city = components.get("city") or components.get("town") or components.get("village") or components.get("county")
+            state = components.get("state")
+            return {
+                "city": city,
+                "state": state,
+                "address": location.address,
+                "raw_data": location.raw
+            }
+        else:
+            print(f"[ERROR] Could not find address for coordinates: {lat}, {lng}")
+            return None
+    except (GeocoderTimedOut, GeocoderServiceError) as e:
+        print(f"[ERROR] Reverse geocoding service error: {e}")
+        return None
