@@ -16,14 +16,14 @@ models.Base.metadata.create_all(bind=database.engine)
 app = FastAPI()
 
 origins = [
-    "http://localhost:8000",   # React/Vue dev server
-    "https://yourdomain.com",  # Production frontend
+    "http://localhost:8000",   
+    "https://yourdomain.com",  
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],          # list of allowed origins
-    allow_credentials=True,
+    allow_credentials= False,
     allow_methods=["*"],            # allow all HTTP methods
     allow_headers=["*"],            # allow all headers
 )
