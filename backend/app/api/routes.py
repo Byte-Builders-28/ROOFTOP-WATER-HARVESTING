@@ -100,5 +100,3 @@ def read_water_quality_route(uuid: str, db: Session = Depends(database.get_db)):
     if not db_item:
         raise HTTPException(status_code=404, detail="Water quality data not found")
     return db_item
-
-@router.get()
