@@ -25,7 +25,7 @@ class WaterInput(BaseModel):
 # Input for saving WaterQuality
 class WaterQualityCreate(BaseModel):
     uuid: str
-    ph: int
+    ph: float
     tds: int
     diameter: float
     water_depth: float

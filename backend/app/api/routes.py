@@ -16,6 +16,10 @@ router = APIRouter(prefix="/api")
 def read_root():
    return {"message" : "FastApi is running"}
 
+@router.get("/checkup")
+def read_root():
+   return {"message" : "Awake"}
+
 from typing import Optional
 from ..utils.location import get_location_details, get_address_from_coords  # your functions
 
@@ -96,3 +100,5 @@ def read_water_quality_route(uuid: str, db: Session = Depends(database.get_db)):
     if not db_item:
         raise HTTPException(status_code=404, detail="Water quality data not found")
     return db_item
+
+@router.get()
