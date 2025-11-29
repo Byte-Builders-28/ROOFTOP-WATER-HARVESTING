@@ -1,6 +1,8 @@
 import os
 from dotenv import load_dotenv
 import requests
+from collections import defaultdict
+
 
 from backend.app.utils.location import get_location_details
 
@@ -62,59 +64,52 @@ def get_info_from_location(state: str, city: str):
 
     return result
 
-
 def get_next5days_rain(state: str, city: str) -> list[float]:
-    """
-    Returns an ordered list of rainfall (mm) for the next 5 days.
-    Example: [4.2, 0.0, 7.8, 1.5, 0.0]
-    """
-    print(f"[DEBUG] get_next5days_rain called with state={state}, city={city}")
-
-    # Load API key
     load_dotenv()
     API_KEY = os.getenv("OPENWEATHER_API_KEY")
     if not API_KEY:
-        print("[ERROR] OPENWEATHER_API_KEY not found in .env")
+        print("[ERROR] OPENWEATHER_API_KEY not found")
         return []
 
-    # Get latitude/longitude
     location = get_location_details(f"{city}, {state}")
-    print(f"[DEBUG] Location details: {location}")
-
     if not location:
-        print(f"[ERROR] Could not resolve coordinates for {city}, {state}")
         return []
 
-    lat, lon = location.get("latitude"), location.get("longitude")
-    if lat is None or lon is None:
-        print(f"[ERROR] Missing latitude/longitude in location: {location}")
-        return []
+    lat, lon = location["latitude"], location["longitude"]
 
-    # Query 5-day forecast (3-hour steps)
-    url = f"https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={API_KEY}&units=metric"
-    print(f"[DEBUG] OpenWeather request URL: {url}")
+    url = (
+        "https://api.openweathermap.org/data/2.5/forecast"
+        f"?lat={lat}&lon={lon}&appid={API_KEY}&units=metric"
+    )
 
     try:
         resp = requests.get(url, timeout=10)
         resp.raise_for_status()
         data = resp.json()
     except Exception as e:
-        print(f"[ERROR] Request to OpenWeather failed: {e}")
+        print("[ERROR] OpenWeather request failed:", e)
         return []
 
-    # Parse rainfall forecast (aggregate per day)
-    rain_by_day = {}
+    rain_by_day = defaultdict(float)
+    today = date.today()
+
     for entry in data.get("list", []):
-        dt_txt = entry.get("dt_txt")  # e.g. "2025-09-13 15:00:00"
-        date = dt_txt.split(" ")[0] if dt_txt else None
-        rain_mm = entry.get("rain", {}).get("3h", 0.0)
-        if date:
-            rain_by_day[date] = rain_by_day.get(date, 0.0) + rain_mm
+        ts = entry.get("dt")
+        if not ts:
+            continue
 
-    # Sort by date and take only next 5 days
-    sorted_days = sorted(rain_by_day.items())[:5]
+        day = datetime.utcfromtimestamp(ts).date()
 
-    result = [round(r, 2) for _, r in sorted_days]
-    print(f"[DEBUG] Next 5 days rainfall list: {result}")
+        # Skip today; we want full future days only
+        if day <= today:
+            continue
 
+        rain_3h = entry.get("rain", {}).get("3h", 0.0)
+        rain_by_day[day] += rain_3h
+
+    # Take next 5 days in order
+    next_5_days = sorted(rain_by_day.items())[:5]
+    result = [round(rain, 2) for _, rain in next_5_days]
+
+    print("[DEBUG] Next 5 days rainfall list:", result)
     return result
