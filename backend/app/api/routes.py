@@ -10,6 +10,8 @@ from ..utils.weather import get_next5days_rain
 from .models import RainRequest, WaterInput, WaterQualityCreate, WaterQualityResponse
 from ..algo.ML.water_budget_model import predict_water_risk
 
+from ..utils.discord import send_to_discord_from_response
+
 router = APIRouter(prefix="/api")
 
 @router.get("/")
@@ -84,6 +86,9 @@ def get_prediction(data: WaterInput, db: Session = Depends(database.get_db)):
         ph=quality.ph,
         tds=quality.tds
     )
+
+    send_to_discord_from_response(result, data.state, data.city)
+
     return result
 
 
