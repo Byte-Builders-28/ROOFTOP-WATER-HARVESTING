@@ -21,6 +21,11 @@ class WaterInput(BaseModel):
     population: int
     avg_need: Optional[int] = 135
 
+    ph: float | None = None
+    tds: float | None = None
+    
+
+
 
 # Input for saving WaterQuality
 class WaterQualityCreate(BaseModel):

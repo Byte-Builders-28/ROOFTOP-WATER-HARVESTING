@@ -70,12 +70,26 @@ def get_prediction(data: WaterInput, db: Session = Depends(database.get_db)):
     rain_next7 = get_next5days_rain(data.state, data.city)
     dry_days = 0 if max(rain_next7) > 0 else 7
 
-    # Fetch water quality from DB using UUID
-    quality = crud.get_water_quality(db, data.uuid)
-    if not quality:
-        raise HTTPException(status_code=404, detail="Water quality data not found for this UUID")
+    # Decide pH and TDS: prefer client input, fallback to DB
+    ph = data.ph
+    tds = data.tds
 
-    # Call updated predict_water_risk with ph and tds
+    # If not provided, fetch from DB
+    if ph is None or tds is None:
+        quality = crud.get_water_quality(db, data.uuid)
+        if not quality:
+            raise HTTPException(status_code=404, detail="Water quality data not found for this UUID")
+        
+        if ph is None:
+            ph = quality.ph
+        if tds is None:
+            tds = quality.tds
+
+    # Ensure final values are valid
+    if ph is None or tds is None:
+        raise HTTPException(status_code=400, detail="ph and tds missing and not found in DB")
+
+    # ML prediction
     result = predict_water_risk(
         tank_cap=data.tank_cap,
         current_level=data.current_level,
@@ -83,8 +97,8 @@ def get_prediction(data: WaterInput, db: Session = Depends(database.get_db)):
         avg_need=data.avg_need,
         rain_next7_list=rain_next7,
         dry_days=dry_days,
-        ph=quality.ph,
-        tds=quality.tds
+        ph=ph,
+        tds=tds
     )
 
     send_to_discord_from_response(result, data.state, data.city)
