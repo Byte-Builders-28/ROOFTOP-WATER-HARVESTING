@@ -98,6 +98,7 @@ def get_next5days_rain(state: str, city: str) -> list[float]:
         resp = requests.get(url, timeout=10)
         resp.raise_for_status()
         data = resp.json()
+        print(f"[DATA] data: {data}")
     except Exception as e:
         print(f"[ERROR] Request to OpenWeather failed: {e}")
         return []
