@@ -10,7 +10,7 @@ from ..utils.weather import get_next5days_rain
 from .models import RainRequest, WaterInput, WaterQualityCreate, WaterQualityResponse
 from ..algo.ML.water_budget_model import predict_water_risk
 
-from ..utils.discord import send_to_discord_from_response
+# from ..utils.discord import send_to_discord_from_response
 
 router = APIRouter(prefix="/api")
 
