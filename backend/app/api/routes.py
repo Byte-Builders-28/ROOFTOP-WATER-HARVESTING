@@ -101,7 +101,7 @@ def get_prediction(data: WaterInput, db: Session = Depends(database.get_db)):
         tds=tds
     )
 
-    send_to_discord_from_response(result, data.state, data.city)
+    # send_to_discord_from_response(result, data.state, data.city)
 
     return result
 
